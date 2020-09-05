@@ -1,7 +1,7 @@
 # RoomsAndLamps
 
 ### Technologies: 
-> Spring Boot, Spring Data, Hibernate, JPA, REST, Spring MVC, MySQL, JUnit, Maven, Thymeleaf, JSON
+> Spring Boot, Spring Data, Hibernate, JPA, REST, Spring MVC, MySQL, JUnit, Maven, Thymeleaf, JSON, JS
 ### Java version: 14
 
 ### Start the app:
@@ -25,6 +25,7 @@
 
 ### REST with some UI
 
+> - To start the app: http://localhost:8080/main 
 > - Get all countires: GET http://localhost:8080/countries/ 
 > - Get all rooms: GET http://localhost:8080/rooms/ 
 > - Get room by id: GET http://localhost:8080/rooms/id
