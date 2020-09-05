@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Room</title>
+</head>
+<body>
+<h1>You are in a room! </h1>
+
+<table th:border="1">
+    <thead>
+    <tr>
+        <th>Room Name</th>
+        <th>Country</th>
+        <th>Lamp</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <form name="roomValue" action="#" th:action="@{/api/room/{id}(id=${room.id},lampOn=*{lampOn})}"
+          th:object="${room}" th:method="post">
+        <td th:text="${room.name}"></td>
+        <td th:text="${room.country.name}"></td>
+        <td>
+            <div th:switch="${room.lampOn}" >
+                <div th:case="false" >
+                    <input type="radio" name="lampOn"  th:field="*{lampOn}" th:value="${!room.lampOn}">ON</input>
+                    <input type="radio" name="lampOn"  checked="checked" th:field="*{lampOn}" th:value="${room.lampOn}">OFF</input>
+                </div>
+                <div th:case="true">
+                    <input type="radio" name="lampOn" th:value="${room.lampOn}" checked="checked" th:field="*{lampOn}"> ON</input>
+                    <input type="radio" name="lampOn" th:value="${!room.lampOn}" th:field="*{lampOn}"> OFF</input>
+                </div>
+            </div>
+            <br/>
+            <input type="submit" value="Save changes">
+        </td>
+    </form>
+    <div id="information"></div>
+    </tbody>
+</table>
+<p/>
+<form method="get" action="#" th:action="@{/api/}">
+    <input type="submit" value="Join another room or create your own">
+</form>
+
+
+</body>
+</html>

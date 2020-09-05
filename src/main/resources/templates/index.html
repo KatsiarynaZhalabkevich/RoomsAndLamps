@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>Rooms and Lamps Service</title>
+    <link rel="stylesheet" href="/main.css"/>
+</head>
+<body>
+<h1>Hello, user!</h1>
+<div><h1><input th:type="text" th:object="${message}" th:text="${message}"
+                style="border: #ff1215; color: #ff1215"></h1></div>
+<h2>Here you can choose an action</h2>
+<h3>Choose room to join</h3>
+
+<table th:border="1" >
+    <thead>
+    <title>Choose room to join</title>
+    <tr>
+        <th>Room Name</th>
+        <th>Country</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="room :${rooms}">
+        <td th:text="${room.name}"></td>
+        <td th:text="${room.country.name}"></td>
+        <td><a th:href="@{/api/room/{id}(id=${room.id})}">Join Room</a></td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<p/>
+<h3>Create your own room</h3>
+<form action="#" th:action="@{/api/room}" th:object="${newRoom}" method="post">
+    <label for="roomName" title="Enter room name:">Enter new room name:</label><br/>
+    <input type="text" id="roomName" th:field="*{name}" placeholder="Room Name"><br/>
+    <label for="country-dropdown">Select country</label><br/>
+    <select id="country-dropdown" name="country" th:field="*{country.id}">
+        <option value="">Select Country</option>
+        <option th:each="country: ${countries}"
+                th:value="${country.id}"
+                th:text="${country.name}"></option>
+    </select><br/>
+    <input type="submit" value="Create Room">
+</form>
+
+
+</body>
+</html>
+<body>
+

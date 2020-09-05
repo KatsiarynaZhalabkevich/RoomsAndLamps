@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+</head>
+<body>
+<h1>Hello, user! Here you can join the existing room or create own one!</h1>
+<div id="create">
+    <h2>Create new room</h2>
+    <form id="createRoom" name="createRoom" method="post" action="javascript:createRoom()">
+        <label for="roomName">Enter new room name:</label><br/>
+        <input type="text" id="roomName" name="roomName" value=""><br/>
+        <label for="country-dropdown">Select country</label><br/>
+        <select id="country-dropdown" name="country">
+        </select><br/>
+        <input type="submit" id="btn" onsubmit="createRoom()" value="Create">
+    </form>
+</div>
+<br/>
+<div id="join">
+    <h2>Choose existing room to join</h2>
+    <table id="table" border="1">
+        <thead>
+        <title>Choose room to join</title>
+        <tr>
+            <th>Room Name</th>
+            <th>Country</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="roomsTable">
+
+        </tbody>
+    </table>
+</div>
+<div id="room_info"></div>
+<script>
+    function changeLampState(roomId) {
+        let changedRoomInfo = document.getElementById('selectedRoom');
+        let changedLampState = document.getElementsByName('lampOn');
+        console.log('id = '+roomId);
+
+
+        for (let i = 0; i < changedLampState.length; i++) {
+            if (changedLampState[i].type === "radio" && changedLampState[i].checked) {
+                changedLampState = changedLampState[i].checked;
+            }
+        }
+        console.log('lamp state = '+changedLampState);
+        let urlPut = 'http://localhost:8080/rooms/' + roomId;
+        let req = new XMLHttpRequest();
+        let jsonToUpdate = JSON.stringify({
+            id: roomId,
+            name: null,
+            country: {
+                id:null,
+                name: null
+            },
+            lampOn: changedLampState
+
+        });
+        req.open('PUT', urlPut, true);
+        req.onloadend = function () {
+            if (req.status === 200) {
+                const info = JSON.parse(req.responseText);
+                createSelectedRoomTable(info);
+            } else if (req.status === 304) {
+                alert("Object can not be modified!");
+            } else {
+                alert('Unknown problem!');
+            }
+        };
+        req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        req.send(jsonToUpdate);
+    }
+</script>
+<!--<script>-->
+<!--    $("input[name='lampOn']").bind("click", function () {-->
+<!--        let room = document.getElementById('selectedRoom');-->
+<!--        $.put('http://localhost:8080/rooms/' + room.id, {-->
+<!--            id: room.id,-->
+<!--            name: room.name,-->
+<!--            country: {-->
+<!--                id: room.country.id,-->
+<!--                name: room.country.name-->
+<!--            },-->
+<!--            lampOn: $("input[name='lampOn']").val()-->
+<!--        }, function (data){-->
+<!--            if (data.status===200){-->
+<!--                data = JSON.parse(data);-->
+<!--                alert('Room info ws updated!');-->
+<!--                createSelectedRoomTable(data);-->
+<!--            }else{-->
+<!--                console.log(data.status);-->
+<!--                alert(data.status+' '+data+' '+'Problems!');-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
+<script>
+    function createSelectedRoomTable(info) {
+        document.getElementById('room_info').innerHTML = "";
+        let roomInfo = document.getElementById('room_info');
+
+        roomInfo.insertAdjacentHTML('afterbegin', '  <h3>Room Info</h3>' +
+            '            <table border="1">' +
+            '                <thead>' +
+            '                    <tr>' +
+            '                        <td>Room Name</td>' +
+            '                        <td>Country</td>' +
+            '                        <td>Lamp Status</td>' +
+            '                    </tr>' +
+            '                </thead>' +
+            '                <tbody>' +
+            '                    <tr id="td_info">');
+
+        let tr_tag = document.getElementById('td_info');
+        let td_tag1 = document.createElement('td');
+        let room = document.createTextNode(info.name);
+        td_tag1.appendChild(room);
+        tr_tag.appendChild(td_tag1);
+
+        let td_tag2 = document.createElement('td');
+        let country = document.createTextNode(info.country.name);
+        td_tag2.appendChild(country);
+        tr_tag.appendChild(td_tag2);
+
+        let td_tag3 = document.createElement('td');
+        tr_tag.appendChild(td_tag3);
+        let radioOn, radioOff, hidden, form;
+
+        form = document.createElement('form');
+        form.setAttribute('action', 'javascript:' + 'changeLampState("'+info.id.toString()+'")');
+        td_tag3.appendChild(form);
+
+        hidden = document.createElement('input');
+        hidden.setAttribute('type', 'hidden');
+        hidden.setAttribute('id', 'selectedRoom');
+        hidden.setAttribute('name', 'selectedRoom');
+        hidden.setAttribute('value', info);
+        form.appendChild(hidden);
+
+        if (info.lampOn === true) {
+            radioOn = document.createElement('input');
+            radioOn.setAttribute('type', 'radio');
+            radioOn.setAttribute('id', 'on');
+            radioOn.setAttribute('name', 'lampOn');
+            radioOn.setAttribute('value', info.lampOn);
+            radioOn.setAttribute('checked', 'checked');
+            radioOn.setAttribute('text', 'ON');
+
+
+            radioOff = document.createElement('input');
+            radioOff.setAttribute('type', 'radio');
+            radioOff.setAttribute('id', 'off');
+            radioOff.setAttribute('name', 'lampOn');
+            radioOff.setAttribute('value', 'false');
+            radioOff.setAttribute('text', 'OFF');
+
+
+        } else {
+            radioOn = document.createElement('input');
+            radioOn.setAttribute('type', 'radio');
+            radioOn.setAttribute('id', 'on');
+            radioOn.setAttribute('name', 'lampOn');
+            radioOn.setAttribute('value', 'true');
+            radioOn.setAttribute('text', 'ON');
+
+
+            radioOff = document.createElement('input');
+            radioOff.setAttribute('type', 'radio');
+            radioOff.setAttribute('id', 'off');
+            radioOff.setAttribute('name', 'lampOn');
+            radioOff.setAttribute('value', info.lampOn);
+            radioOff.setAttribute('checked', 'checked');
+            radioOff.setAttribute('text', 'OFF');
+
+        }
+        form.appendChild(radioOn);
+        form.appendChild(radioOff);
+
+        let btn = document.createElement('input');
+        btn.setAttribute('type', 'submit');
+        btn.setAttribute('value', 'Change lamp state');
+        btn.setAttribute('onsubmit', 'changeLampState("'+info.id.toString()+'")'); // we can send all parameters
+        // if we need to change all room info in future
+
+        form.appendChild(btn);
+
+
+        radioOn.insertAdjacentHTML('beforebegin', '<label for="On">ON</label>');
+        radioOn.insertAdjacentHTML('afterend', '<br/>');
+        radioOff.insertAdjacentHTML('beforebegin', '<label for="Off">OFF</label>');
+        radioOff.insertAdjacentHTML('afterend', '<br/>');
+        roomInfo.insertAdjacentHTML('beforeend', '</tr>' +
+            '                </tbody>' +
+            '            </table>');
+
+    };
+</script>
+<script>
+    function showRoomInfo(url) {
+
+        let r = new XMLHttpRequest();
+        r.open('GET', url, true);
+        r.onload = function () {
+            if (r.status === 200) {
+                const info = JSON.parse(r.responseText);
+                createSelectedRoomTable(info);
+            } else if (r.status === 204) {
+                alert("You can't join selected room from your country. Choose another room! ");
+            } else {
+                alert("Can't get data from server. Please try again later!");
+            }
+        };
+        r.send();
+    };
+</script>
+<script>
+
+    function createRoom() {
+        let optionIndex = document.getElementById("country-dropdown").options.selectedIndex;
+        let optionText = document.getElementById("country-dropdown").options[optionIndex].text;
+        let xhr = new XMLHttpRequest();
+        let json = JSON.stringify({
+            id: null,
+            name: $("input[name='roomName']").val(),
+            country: {
+                id: optionIndex,
+                name: optionText
+            },
+            lampOn: false
+
+        });
+        xhr.onloadend = function () {
+            if (xhr.status === 201) {
+                alert('Room was created!');
+                location.reload();
+            } else {
+                alert('Room name is not unique!');
+            }
+        };
+        xhr.open('POST', 'http://localhost:8080/rooms/room', true);
+        xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        xhr.send(json);
+    }
+</script>
+<script>
+
+    let table = document.getElementById('roomsTable');
+    const url = 'http://localhost:8080/rooms'
+    const request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.onloadend = function createTable() {
+        if (request.status === 200) {
+            const data = JSON.parse(request.responseText);
+
+            let tdRoomName, tdRoomCountry, tdLink, tr;
+
+            for (let i = 0; i < data.length; i++) {
+                tr = document.createElement('tr');
+                tr.setAttribute('id', 'tr' + i);
+                table.appendChild(tr);
+                tdRoomName = document.createElement('td');
+                tdRoomName.setAttribute('id', 'tdRoom' + i);
+                let x = document.createTextNode(data[i].name);
+                tdRoomName.appendChild(x);
+                tr.appendChild(tdRoomName);
+
+                tdRoomCountry = document.createElement('td');
+                let y = document.createTextNode(data[i].country.name);
+                tdRoomCountry.appendChild(y);
+                tr.appendChild(tdRoomCountry);
+
+                tdLink = document.createElement('td');
+                tr.appendChild(tdLink);
+                let form = document.createElement('form');
+                let arg = 'http://localhost:8080/rooms/' + data[i].id;
+                form.setAttribute('action', 'javascript:' + 'showRoomInfo("' + arg + '")');
+                let btn = document.createElement('input');
+                btn.setAttribute('type', 'submit');
+                btn.setAttribute('value', 'Join Room');
+                btn.setAttribute('onsubmit', 'showRoomInfo("' + arg + '")');
+                tdLink.appendChild(form);
+                form.appendChild(btn);
+
+            }
+        } else {
+            alert('No rooms to show');
+        }
+
+    };
+    request.send();
+
+</script>
+<script>
+
+    let dropdown = document.getElementById('country-dropdown');
+    dropdown.length = 0;
+
+    let defaultOption = document.createElement('option');
+    defaultOption.text = 'Choose Country';
+
+    dropdown.add(defaultOption);
+    dropdown.selectedIndex = 0;
+
+    const urlCountries = 'http://localhost:8080/countries';
+
+    const request1 = new XMLHttpRequest();
+    request1.open('GET', urlCountries, true);
+
+    request1.onload = function () {
+        if (request1.status === 200) {
+            const data = JSON.parse(request1.responseText);
+            let option;
+            for (let i = 0; i < data.length; i++) {
+                option = document.createElement('option');
+                option.name = 'countryOption';
+                option.id = data[i].id;
+                option.text = data[i].name;
+                option.value = data[i].name;
+                dropdown.add(option);
+            }
+        } else {
+            let errorOption = document.createElement('option');
+            errorOption.text = 'No countries to choose';
+            dropdown.add(errorOption);
+        }
+    }
+
+    request1.onerror = function () {
+        console.error('An error occurred fetching the JSON from ' + url);
+    };
+
+    request1.send();
+</script>
+</body>
+</html>
